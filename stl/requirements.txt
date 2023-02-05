@@ -1,0 +1,6 @@
+Pillow==9.4.0
+streamlit==1.16.0
+ipython
+pythreejs
+scikit-learn
+stpyvista

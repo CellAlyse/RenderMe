@@ -1,0 +1,6 @@
+streamlit==1.16.0
+ipython
+pythreejs
+pyvista
+Pillow
+stpyvista
