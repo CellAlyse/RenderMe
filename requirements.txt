@@ -1,6 +1,5 @@
-streamlit==1.16.0
-ipython
-pythreejs
+streamlit
 pyvista
-Pillow
-stpyvista
+pythreejs==2.3.0
+ipywidgets==7.7.1
+ipython==8.4.0
