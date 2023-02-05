@@ -60,7 +60,7 @@ st.sidebar.markdown("---")
 
 col1,col2 = st.sidebar.columns(2)
 color_stl = col1.color_picker("Element","#848b90")
-color_bkg = col2.color_picker("Background","#161616")
+color_bkg = col2.color_picker("Background","#0e1117")
 
 
 plotter = pv.Plotter(border=False, window_size=[800,900]) 
