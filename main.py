@@ -11,7 +11,6 @@ import streamlit.components.v1 as components
 from ipywidgets.embed import embed_minimal_html
 import streamlit as st
 
-pv.start_xvfb()
 icon = Image.open("favicon.ico")
 st.set_page_config(
     page_title="CellAlyse",
@@ -51,22 +50,30 @@ hide_streamlit_style = """
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-model = st.sidebar.selectbox(
-    "Wähle ein Modell aus:",
-    ("Mikroskop", "lens_tool"),
+folder = st.sidebar.selectbox(
+    "Wähle einen Typ aus:",
+    ("Komplett","Elektronik", "Objektiv", "komplexe Körper", "Tubus", "XYZ"),
 )
+
+# get all stl files in the folder 
+stl_files = [f for f in Path(f"stl/{folder}").glob("*.stl")]
+stl_files = [f.name for f in stl_files]
+
+# let the user select a stl file
+model = st.sidebar.selectbox("Wähle ein Modell aus:", stl_files)
+
 
 st.sidebar.markdown("---")
 
 col1,col2 = st.sidebar.columns(2)
-color_stl = col1.color_picker("Körper","#848b90")
-color_bkg = col2.color_picker("Hintergrund","#0e1117")
+color_stl = col1.color_picker("Element","#848b90")
+color_bkg = col2.color_picker("Background","#161616")
 
 
 plotter = pv.Plotter(border=False, window_size=[800,900]) 
 plotter.background_color = color_bkg
 with tempfile.NamedTemporaryFile(suffix=".stl") as stl_file:
-    stl_file.write(open(f"stl/{model}.stl", "rb").read())
+    stl_file.write(open(f"stl/{folder}/{model}", "rb").read())
     reader = pv.STLReader(stl_file.name)
 
 
