@@ -66,8 +66,8 @@ model = st.sidebar.selectbox("Wähle ein Modell aus:", stl_files)
 st.sidebar.markdown("---")
 
 col1,col2 = st.sidebar.columns(2)
-color_stl = col1.color_picker("Element","#848b90")
-color_bkg = col2.color_picker("Background","#0e1117")
+color_stl = col1.color_picker("Modell","#848b90")
+color_bkg = col2.color_picker("Hintergrund","#0e1117")
 
 
 plotter = pv.Plotter(border=False, window_size=[800,900]) 
