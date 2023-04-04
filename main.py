@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 from ipywidgets.embed import embed_minimal_html
 import streamlit as st
 
-# pv.start_xvfb()
+pv.start_xvfb()
 
 icon = Image.open("favicon.ico")
 st.set_page_config(
