@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 from ipywidgets.embed import embed_minimal_html
 import streamlit as st
 
-pv.start_xvfb()
+pv.set_jupyter_backend('pythreejs')
 
 icon = Image.open("favicon.ico")
 st.set_page_config(
@@ -53,7 +53,6 @@ hide_streamlit_style = """
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# create a list with all directories exclude other files
 folder_list = glob.glob("*")
 folder_list = [f for f in folder_list if Path(f).is_dir()]
 folder = st.sidebar.selectbox("Wähle einen Ordner aus:", folder_list)
@@ -74,30 +73,26 @@ model = st.sidebar.selectbox("Wähle ein Modell aus:", stl_files)
 
 st.sidebar.markdown("---")
 
-col1,col2 = st.sidebar.columns(2)
-color_stl = col1.color_picker("Modell","#848b90")
-color_bkg = col2.color_picker("Hintergrund","#0e1117")
+with tempfile.NamedTemporaryFile(suffix="_streamlit") as f:
+    st.write(f"{folder}/{model}")
+    col1, col2 = st.sidebar.columns(2)
+    color_stl = col1.color_picker("Modell", "#848b90")
+    color_bkg = col2.color_picker("Hintergrund", "#0e1117")
 
+    ## Initialize pyvista reader and plotter
+    plotter = pv.Plotter(border=False, window_size=[500, 400])
+    plotter.background_color = color_bkg
 
-plotter = pv.Plotter(border=False, window_size=[800,900])
-plotter.background_color = color_bkg
-with tempfile.NamedTemporaryFile(suffix=".stl") as stl_file:
-    stl_file.write(open(f"{folder}/{model}", "rb").read())
-    reader = pv.STLReader(stl_file.name)
+    f.write(open(f"{folder}/{model}", "rb").read())
+    reader = pv.STLReader(f.name)
+
+    ## Read data and send to plotter
     mesh = reader.read()
-    mesh = mesh.decimate(0.5)
-    plotter.add_mesh(
-        mesh,
-        color=color_stl,
-        specular=0.8,
-        specular_power=20,
-    )
-    plotter.enable_eye_dome_lighting()
-    plotter.enable_anti_aliasing()
-    plotter.enable_depth_peeling()
-    plotter.add_light(
-        pv.Light(position=[0, 10, 10], intensity=0.8)
-    )
+    plotter.add_mesh(mesh, color=color_stl)
+
+    ## Export to a pythreejs HTML
     model_html = io.StringIO()
-    plotter.export_html(model_html, backend="pythreejs")
-    st.components.v1.html(model_html.getvalue(),height=900)
+    plotter.export_html(model_html, backend='pythreejs')
+
+    ## Show in webpage
+    st.components.v1.html(model_html.getvalue(), height=400)
