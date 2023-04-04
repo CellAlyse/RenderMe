@@ -54,14 +54,12 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 folder = st.sidebar.selectbox(
     "Wähle einen Typ aus:",
-    ("Komplett","Elektronik", "Objektiv", "komplexe Körper", "Tubus", "XYZ"),
+    ("Condensor","Electronics", "Main Body", "Tube", "Complex Versions"),
 )
 
-# get all stl files in the folder 
 stl_files = [f for f in Path(f"stl/{folder}").glob("*.stl")]
 stl_files = [f.name for f in stl_files]
 
-# let the user select a stl file
 model = st.sidebar.selectbox("Wähle ein Modell aus:", stl_files)
 
 
@@ -92,10 +90,8 @@ with tempfile.NamedTemporaryFile(suffix=".stl") as stl_file:
     plotter.enable_eye_dome_lighting()
     plotter.enable_anti_aliasing()
 
-    # increase quality of the mesh even more
     plotter.enable_depth_peeling()
 
-    # add a better light source
     plotter.add_light(
         pv.Light(position=[0, 10, 10], intensity=0.8)
     )
