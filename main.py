@@ -1,3 +1,4 @@
+import glob
 from io import StringIO
 from pathlib import Path
 from typing import Optional, Union
@@ -11,7 +12,7 @@ import streamlit.components.v1 as components
 from ipywidgets.embed import embed_minimal_html
 import streamlit as st
 
-pv.start_xvfb()
+# pv.start_xvfb()
 
 icon = Image.open("favicon.ico")
 st.set_page_config(
@@ -52,12 +53,20 @@ hide_streamlit_style = """
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-folder = st.sidebar.selectbox(
-    "Wähle einen Typ aus:",
-    ("Condensor","Electronics", "Main Body", "Tube", "Complex Versions"),
-)
+# create a list with all directories exclude other files
+folder_list = glob.glob("*")
+folder_list = [f for f in folder_list if Path(f).is_dir()]
+folder = st.sidebar.selectbox("Wähle einen Ordner aus:", folder_list)
+st.write(folder)
+# if there are subfolders, select one. Exclude other files
+subfolder_list = glob.glob(f"{folder}/*")
+subfolder_list = [f for f in subfolder_list if Path(f).is_dir()]
+if len(subfolder_list) > 0:
+    subfolder = st.sidebar.selectbox("Wähle einen Unterordner aus:", subfolder_list)
+    st.write(subfolder)
+    folder = subfolder
 
-stl_files = [f for f in Path(f"stl/{folder}").glob("*.stl")]
+stl_files = [f for f in Path(f"{folder}").glob("*.stl")]
 stl_files = [f.name for f in stl_files]
 
 model = st.sidebar.selectbox("Wähle ein Modell aus:", stl_files)
@@ -70,13 +79,11 @@ color_stl = col1.color_picker("Modell","#848b90")
 color_bkg = col2.color_picker("Hintergrund","#0e1117")
 
 
-plotter = pv.Plotter(border=False, window_size=[800,900]) 
+plotter = pv.Plotter(border=False, window_size=[800,900])
 plotter.background_color = color_bkg
 with tempfile.NamedTemporaryFile(suffix=".stl") as stl_file:
-    stl_file.write(open(f"stl/{folder}/{model}", "rb").read())
+    stl_file.write(open(f"{folder}/{model}", "rb").read())
     reader = pv.STLReader(stl_file.name)
-
-
     mesh = reader.read()
     mesh = mesh.decimate(0.5)
     plotter.add_mesh(
@@ -84,18 +91,13 @@ with tempfile.NamedTemporaryFile(suffix=".stl") as stl_file:
         color=color_stl,
         specular=0.8,
         specular_power=20,
-
     )
-
     plotter.enable_eye_dome_lighting()
     plotter.enable_anti_aliasing()
-
     plotter.enable_depth_peeling()
-
     plotter.add_light(
         pv.Light(position=[0, 10, 10], intensity=0.8)
     )
     model_html = io.StringIO()
     plotter.export_html(model_html, backend="pythreejs")
-
     st.components.v1.html(model_html.getvalue(),height=900)
